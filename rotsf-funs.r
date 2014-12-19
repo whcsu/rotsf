@@ -1,4 +1,4 @@
-rotsf<-function (formula, data, trlength=500,k=2,control = control, na.action =  na.omit) 
+rotsf<-function (formula, data, trlength=1000,k=2,control = control, na.action =  na.omit) 
 {
   Call <- match.call()
 
