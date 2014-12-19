@@ -105,7 +105,7 @@ rotsf<-function (formula, data, trlength=1000,k=2,control = control, na.action =
   return(list(trees=trees,rotms=rotms,rii=rii))
 }
 
-rotsf.predict<-function(rotsffit,newdata,trlength=500){
+rotsf.predict<-function(rotsffit,newdata,trlength=1000){
   
   trees=rotsffit$trees
   rotms=rotsffit$rotms
