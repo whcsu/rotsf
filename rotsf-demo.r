@@ -11,6 +11,7 @@ library(randomForestSRC)
 
 source("rotsf-funs.R")
 
+
 set.seed(123)
 
 #PBC DATA
@@ -19,53 +20,52 @@ pbc=na.omit(pbc)
 
 n=dim(pbc)[1]
 
+Rn=1000
+testresult <-data.frame(row.names=1:Rn)
+
+#AUC
+ci_rotsf<-c(rep(0,Rn))
+
+ci_rsf<-c(rep(0,Rn))
+ci_cox<-c(rep(0,Rn))
+ci_gbm<-c(rep(0,Rn))
+
+for (i in 1:Rn)
+   {
 L=sample(1:n,ceiling(n*0.8))
 trset<-pbc[L,]
 teset<-pbc[-L,]
+rii=c(1,2)
+print(i)
+# rotsf
+
+rotsf.fit=rotsf(Surv(days, status)~., data=trset,trlength=1000)
+rotsf_pre=rotsf.predict(rotsf.fit,teset[,-c(rii)],trlength=1000)
+ci1=concordance.index(rotsf_pre,teset$days,teset$status)
+ci_rotsf[i]=unlist(ci1[1])
 
 
 
-rotsf.fit=rotsf(Surv(days, status)~., data=trset)
-rotsf_pre=rotsf.predict(rotsf.fit,teset)
+# rfsrc 
+rsf=rfsrc(Surv(days, status)~., data = trset) 
+rsfpre<-predict(rsf,teset[,-c(rii)])
+ci2=concordance.index(rsfpre$predicted,teset$days,teset$status)
+ci_rsf[i]=unlist(ci2[1])
 
-ci=concordance.index(rotsf_pre,teset$days,teset$status)
-ci[1]
+#cox
+cox.obj <- coxph(Surv(days, status)~., data = trset)
+coxpre<-predict(cox.obj,teset[,-c(rii)])
+ci3=concordance.index(coxpre,teset$days,teset$status)
+ci_cox[i]=unlist(ci3[1])
 
-#CANCER DATA
-data(cancer, package = "survival")
-cancer[,3]=cancer[,3]-1
-cancer=cancer[,-c(1)]
-cancer=na.omit(cancer)
+#gbm
+gbm.obj <- gbm(Surv(days, status)~.,distribution="coxph", data = trset,n.trees=1000)
+gbmpre<-predict(gbm.obj,teset[,-c(rii)],n.trees=1000)
+ci4=concordance.index(gbmpre,teset$days,teset$status)
+ci_gbm[i]=unlist(ci4[1])
 
-n2=dim(cancer)[1]
+}
 
-L2=sample(1:n2,ceiling(n2*0.8))
-trset2<-cancer[L2,]
-teset2<-cancer[-L2,]
+testresult=cbind(testresult,data.frame(unlist(ci_rotsf),unlist(ci_rsf),unlist(ci_cox),unlist(ci_gbm)))
 
-
-
-rotsf.fit2=rotsf(Surv(time, status)~., data=trset2)
-rotsf_pre2=rotsf.predict(rotsf.fit2,teset2)
-
-ci2=concordance.index(rotsf_pre2,teset2$time,teset2$status)
-ci2[1]
-
-#STAGEC DATA
-data(stagec, package = "rpart")
-stagec[,8]=as.numeric(stagec[,8])
-stagec=na.omit(stagec)
-n3=dim(stagec)[1]
-
-
-L3=sample(1:n3,ceiling(n3*0.8))
-trset3<-stagec[L3,]
-teset3<-stagec[-L3,]
-
-
-
-rotsf.fit3=rotsf(Surv(pgtime, pgstat)~., data=trset3)
-rotsf_pre3=rotsf.predict(rotsf.fit3,teset3)
-
-ci3=concordance.index(rotsf_pre3,teset3$pgtime,teset3$pgstat)
-ci3[1]
+write.csv(testresult,"surv-pbc.csv")
