@@ -1,7 +1,5 @@
 rotsf
 =====
 
-rotation survival forest for PBC data
-
-submitted for bio-informatics
+Rotation survival forest for right censored data, PeerJ
 
