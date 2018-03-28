@@ -22,38 +22,45 @@
 # wh@csu.edu.cn
 # -------------------------------------------------------------------------------
 
-##' Prediction with new data and return a saved forest with mean hazard function 
+##' Prediction with new data and return a saved forest with survival proability at.
+##' Each unique time points
 ##' @export
-rotsf.predict <-
-function(rotsffit,newdata,trlength=500){
-
-  trees=rotsffit$pectrees
-  rotms=rotsffit$rotms
-  rii=rotsffit$rii
-
-  if (trlength>length(rotsffit$rotms))
+rotsfpca.surv_predict <-
+function(rotsfpcafit,newdata,uniquetimes,trlength=500){
+  
+  trees=rotsfpcafit$pectrees
+  rotms=rotsfpcafit$rotms
+  rii=rotsfpcafit$rii
+  
+  if (trlength>length(rotsfpcafit$rotms))
     stop("Number of Trees for prediction should not be more than Number of Trees Fitted")
-
-  # classify the test data
-  testpre<-NULL
+  
+ 
+  # Preparing testpre dataframe 
+  testpre <- matrix(0,nrow = dim(newdata)[1],  ncol= length(uniquetimes))
+  colnames(testpre)=paste0(uniquetimes)
+  
   for (i in 1:trlength) {
     #if (oobacc[i]<=avroobacc)
-{
-
-  # preparing for testing
-  rmatrix2=as.matrix(newdata) %*% t(rotms[[i]])
-  rmatrixnew2=as.data.frame(rmatrix2)
-
-  colnames(rmatrixnew2)=colnames(newdata)
-
-  predicts<-predict(trees[[i]]$rpart,rmatrixnew2)
-
-  testpre<-cbind(predicts,testpre)
-}
+    {
+      
+      # preparing for testing
+      rmatrix2=as.matrix(newdata) %*% t(rotms[[i]])
+      rmatrixnew2=as.data.frame(rmatrix2)
+      
+      colnames(rmatrixnew2)=colnames(newdata)
+      
+    
+      
+      predicts=predictSurvProb(trees[[i]],rmatrixnew2,uniquetimes)
+      #convert all NA into zero
+      predicts[is.na(predicts)]=0
+      colnames(predicts)=paste0(uniquetimes)
+      #print((predicts[1,100]))
+      testpre<-testpre+predicts
+    }
   }
-
-ensemble_predictions<-rowMeans(testpre)
-
-return(ensemble_predictions)
-
+  
+  return(testpre/trlength)
+  
 }

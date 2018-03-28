@@ -22,45 +22,45 @@
 # wh@csu.edu.cn
 # -------------------------------------------------------------------------------
 
-##' Prediction with new data and return a saved forest with survival proability at.
-##' Each unique time points
+##' Prediction with new data and return a saved forest with mean hazard function 
 ##' @export
-rotsf.surv_predict <-
-function(rotsffit,newdata,uniquetimes,trlength=500){
-  
-  trees=rotsffit$pectrees
-  rotms=rotsffit$rotms
-  rii=rotsffit$rii
-  
-  if (trlength>length(rotsffit$rotms))
+rrotsfpls_surv.predict<-function(object,newdata,uniquetimes,trlength=object$trlength){
+
+  trees=object$pectrees
+  rotms=object$rotms
+  colindexes=object$colindexes
+  nplscomp=object$nplscomp
+
+  if (trlength>object$trlength)
     stop("Number of Trees for prediction should not be more than Number of Trees Fitted")
-  
- 
-  # Preparing testpre dataframe 
+
+  # classify the test data
+   # Preparing testpre dataframe 
   testpre <- matrix(0,nrow = dim(newdata)[1],  ncol= length(uniquetimes))
   colnames(testpre)=paste0(uniquetimes)
   
   for (i in 1:trlength) {
     #if (oobacc[i]<=avroobacc)
-    {
-      
-      # preparing for testing
-      rmatrix2=as.matrix(newdata) %*% t(rotms[[i]])
-      rmatrixnew2=as.data.frame(rmatrix2)
-      
-      colnames(rmatrixnew2)=colnames(newdata)
-      
-    
-      
-      predicts=predictSurvProb(trees[[i]],rmatrixnew2,uniquetimes)
-      #convert all NA into zero
+{
+
+  # preparing for testing
+  
+  testdata=newdata[,colindexes[[i]]]
+  rmatrix2=as.matrix(testdata) %*% (rotms[[i]])
+  rmatrixnew2=as.data.frame(rmatrix2)
+
+  #colnames(rmatrixnew2)=colnames(testdata)
+  colnames(rmatrixnew2)=colnames(testdata)[1:nplscomp]
+  
+  predicts=predictSurvProb(trees[[i]],rmatrixnew2,uniquetimes)
+   #convert all NA into zero
       predicts[is.na(predicts)]=0
       colnames(predicts)=paste0(uniquetimes)
       #print((predicts[1,100]))
       testpre<-testpre+predicts
-    }
+}
   }
-  
-  return(testpre/trlength)
-  
+
+return(testpre/trlength)
+
 }
