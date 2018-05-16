@@ -1,15 +1,14 @@
-rotsf
-=====
-Zhou, L., Xu, Q., & Wang, H. (2015). Rotation survival forest for right censored data. PeerJ, 3, e1009
+# Survival Forest with PCA and Partial Least Squares
 
-bibtex
-@article{zhou2015rotation,
-  title={Rotation survival forest for right censored data},
-  author={Zhou, Lifeng and Xu, Qingsong and Wang, Hong},
-  journal={PeerJ},
-  volume={3},
-  pages={e1009},
-  year={2015},
-  publisher={PeerJ Inc.}
-}
+We investigate the plausibility of extending a rotation forest, originally proposed for classification purpose, to survival analysis. Currently, PCA(Principal components analysis) , SPLS(Sparse partial least squares) rotation are supported.
 
+For a detailed information, see the papers by Zhou L, Xu Q, Wang H. (2015) Rotation survival forest for right censored data. <https://doi.org/10.7717/peerj.1009> and Zhou L, Xu Q, Wang H. (2016), Random rotation survival forest for high dimensional censored data. <https://doi.org/10.1186/s40064-016-3113-5>.
+
+"Survival Forest with Partial Least Squares For High Dimensional Censored Data" is submitted to Chemometrics and Intelligent Laboratory Systems.
+
+
+Download the package via github
+
+install.packages("devtools") # if you have not installed "devtools" package
+
+devtools::install_github("whcsu/rotsf")
