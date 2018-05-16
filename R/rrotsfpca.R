@@ -41,9 +41,6 @@
 ##' head(testpretimes[,3])
 ##' # Get the 1th base model
 ##' firstbasemodel=elmsurvmodel$elmsurvfit[[1]]
-#' @useDynLib rotsf, .registration = TRUE
-#' @import survival rpart spls
-#' @importFrom Rcpp evalCpp
 ##' @export
 rrotsfpca<-function (x, y, trlength=500,m=2,mtry=floor(sqrt(ncol(x))), control = control, na.action =  na.omit,vari_status=FALSE)
 {
